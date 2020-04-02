@@ -5,12 +5,14 @@
         비즈니스파트너
       </div>
     </v-ons-toolar>
-    <v-ons-card v-for="bpmaster of bpmasters" :key="bpmaster.CardCode"
-    @click="bpMasterDetail(bpmaster.CardCode)"
-    >
-      <div class="title">{{bpmaster.CardCode}}</div>
-      <div class="content">{{bpmaster.CardName}}</div>
-    </v-ons-card>
+    <div v-if="bpmasters" >
+      <v-ons-card v-for="bpmaster of bpmasters" :key="bpmaster.CardCode"
+      @click="bpMasterDetail(bpmaster.CardCode)"
+      >
+        <div class="title">{{bpmaster.CardCode}}</div>
+        <div class="content">{{bpmaster.CardName}}</div>
+      </v-ons-card>
+    </div>
   </v-ons-page>
 </template>
 
@@ -18,39 +20,46 @@
 // @ is an alias to /src
 // import Login from '@/components/Login.vue'
 var axios = require('axios');
-axios.defaults.headers.post['Content-Type'] = 'application/json';
+axios.defaults.withCredentials = true; 
+var tempArr = [];
 
 export default {
   name: 'BusinessParters',
-  created: function(){
-    this.bpmasters.pop();
-    this.bpmasters.push(
-      {
-        CardCode:'A1010', CardName:'테스트BP1'
-      },
-      {
-        CardCode:'B1010', CardName:'테스트BP2'
-      },
-      {
-        CardCode:'C1010', CardName:'테스트BP3'
-      },
-      {
-        CardCode:'D1010', CardName:'테스트BP4'
-      },
-      {
-        CardCode:'E1010', CardName:'테스트BP5'
-      }
-    );
-  },
-  data() {
-    return {
-      bpmasters: [
+  data: function(){
+    return{
+      bpmasters : [
         {
-          CardCode: '',
-          CardName: ''
+          CardCode:'',
+          CardName:''
         }
       ]
     }
+  },
+  mounted: function(){
+      const vm = this;
+      axios.get('https://devhana.c4mix.com:50000/b1s/v1/BusinessPartners' ,{
+      params:{
+        $select: `CardCode,CardName`,
+        $orderby: `CardCode`,
+        $top:`20`
+      },
+      paramsSerializer: (params) =>{
+        let result = '';
+        Object.keys(params).forEach(key => {
+            result += `${key}=${encodeURIComponent(params[key])}&`;
+        });
+        return result.substr(0, result.length - 1);
+      }
+    })
+      .then(function (response){
+        tempArr = response.data.value;
+        vm.bpmasters = tempArr;
+        console.log(vm.bpmasters);
+        
+      })
+      .catch(function(error){
+        alert('에러입니다. ' + error);
+      })
   },
   methods:{
     bpMasterDetail: function(CardCode){

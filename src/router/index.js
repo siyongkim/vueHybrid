@@ -25,6 +25,11 @@ const routes = [
     path: '/BusinessPartners/:CardCode',
     name: 'Details',
     component: () => import(/* webpackChunkName: "about" */ '../views/BusinessPartnersDetail.vue')
+  },
+  {
+    path: '/DeliveryNoteCreate',
+    name: 'DeliveryNoteCreate',
+    component: () => import(/* webpackChunkName: "about" */ '../views/DeliveryNoteCreate.vue')
   }
   // {
   //   path: '/Login',

@@ -26,12 +26,12 @@ export default {
           desc: '비즈니스파트너 마스터 데이터를 조회하고 관리합니다.'
         },
         {
-          name: 'Delivery Note',
+          name: 'DeliveryNoteCreate',
           title: '납품',
           desc: 'SAP 납품문서를 조회하고 등록합니다.'
         },
         {
-          name: 'A/R Invoice',
+          name: 'ARInvoice',
           title: 'AR송장',
           desc: 'SAP AR송장을 조회하고 등록합니다.'
         }
