@@ -16,9 +16,9 @@ Vue.config.productionTip = false
 Vue.use(VueOnsen);
 Vue.use(VueCookies);
 
-VueOnsen.ready(function(){
-  document.addEventListener('backbutton', function(){window.history.length > 1 ? Vue.$router.go(-1) : Vue.$router.push('/')});
-})
+// VueOnsen.ready(function(){
+//   setDefaultDeviceBackButtonListener(function() {window.history.length > 1 ? Vue.$router.go(-1) : Vue.$router.push('/')});
+// })
 
 new Vue({
   router,

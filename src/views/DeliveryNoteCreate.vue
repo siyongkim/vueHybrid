@@ -25,7 +25,34 @@
           </v-ons-input>
         </label>
       </v-ons-list-item>
+      <v-ons-list-item>
+        <div class="left">전기일</div>
+        <v-ons-input 
+          placeholder="전기일"
+          v-model="deliveryNote.DocDate"></v-ons-input>
+      </v-ons-list-item>
+      <v-ons-list-item>
+        <div class="left">문서유형</div>
+        <v-ons-select style="width: 40%"
+            v-model="deliveryNote.DocType"
+          >
+            <option v-for="docType in docTypeList" :value="docType.value" :key="docType.value">
+              {{ docType.text }}
+            </option>
+          </v-ons-select>
+      </v-ons-list-item>
     </v-ons-lsit>
+    <v-ons-list>
+      <v-ons-list-header>내용</v-ons-list-header>
+      <v-ons-list-item v-for="lines of deliveryNote.DocumentLines" :key="lines.LineNum">
+        <!-- <v-ons-button v-if="deliveryNote.length === lines.LineNum" @click="addItemRow()">행추가</v-ons-button> -->
+        <v-ons-button  @click="addItemRow()">행추가</v-ons-button> <v-ons-icon icon="md-zoom-in" @click="modalVisible2 = true"></v-ons-icon>
+        <v-ons-input  placeholder="품목코드" v-model="lines.ItemCode"></v-ons-input>
+        <v-ons-input  placeholder="품목명" v-model="lines.ItemName"></v-ons-input>
+        <v-ons-input  placeholder="수량" v-model="lines.Quantity"></v-ons-input>
+        <v-ons-input  placeholder="가격" v-model="lines.Price"></v-ons-input>
+      </v-ons-list-item>
+    </v-ons-list>
 
     <v-ons-modal :visible="modalVisible" >
       <div v-if="cardCodeList">
@@ -34,6 +61,19 @@
           <v-ons-list-item>
             <div class="left">{{bpitem.CardCode}}</div>
             <div class="center">{{bpitem.CardName}}</div>
+            <div class="center">{{bpitem.VATRegNum}}</div>
+          </v-ons-list-item>
+        </v-ons-list>
+      </div>
+    </v-ons-modal>
+
+    <v-ons-modal :visible="modalVisible2" >
+      <div v-if="ItemList">
+        <v-ons-list v-for="item of ItemList" :key="item.ItemCode"
+        @click="setItemCodes(item.ItemCode, item.ItemName)">
+          <v-ons-list-item>
+            <div class="left">{{item.ItemCode}}</div>
+            <div class="center">{{item.ItemName}}</div>
           </v-ons-list-item>
         </v-ons-list>
       </div>
@@ -55,15 +95,16 @@ export default {
       deliveryNote:{
         CardCode: "",
         CardName: "",
-        BPLICode: "",
+        BPL_IDAssignedToInvoice: "",
         DocDate: "",
-        DocDueDate:"",
+        DocType: "",
         DocumentLines:[
           {
+            LineNum: 1,
             ItemCode:"",
             ItemName:"",
             Quantity:0,
-            UnitPrice:0
+            Price:0
           }
         ]
       },
@@ -74,7 +115,19 @@ export default {
           VATRegNum:""
         }
       ],
-      modalVisible: false
+      ItemList:[
+        {
+          ItemCode:"",
+          ItemName:""
+        }
+      ],
+      modalVisible: false,
+      modalVisible2: false,
+      docTypeList:[
+        {text : '', value: ''},
+        {text : '아이템', value: 'dDocument_Items'},
+        {text : '서비스', value: 'dDocument_Service'}
+      ]
     }
   },
   created: function(){
@@ -99,6 +152,28 @@ export default {
       })
       .catch(function(error){
         alert('에러입니다. ' + error);
+      });
+
+      axios.get('https://devhana.c4mix.com:50000/b1s/v1/Items', {
+      params:{
+        $select: `ItemCode,ItemName`,
+        $filter: `Frozen eq 'N'`,
+        $orderby: `ItemCode`
+      },
+      paramsSerializer: (params) =>{
+        let result = '';
+        Object.keys(params).forEach(key => {
+            result += `${key}=${encodeURIComponent(params[key])}&`;
+        });
+        return result.substr(0, result.length - 1);
+      }
+    })
+      .then(function (response){
+        vm.ItemList = response.data.value;
+        console.log(vm.ItemList);
+      })
+      .catch(function(error){
+        alert('에러입니다. ' + error);
       })
   },
   methods: {
@@ -118,6 +193,17 @@ export default {
       this.deliveryNote.CardCode = code;
       this.deliveryNote.CardName = name;
       this.modalVisible = false;
+    },
+    addItemRow: function(){
+      this.deliveryNote.DocumentLines.push(
+        {
+            LineNum: this.deliveryNote.DocumentLines.length + 1,
+            ItemCode:"",
+            ItemName:"",
+            Quantity:0,
+            Price:0
+          }
+      )
     }
   }
 }
