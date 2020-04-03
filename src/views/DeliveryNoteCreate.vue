@@ -45,8 +45,9 @@
     <v-ons-list>
       <v-ons-list-header>내용</v-ons-list-header>
       <v-ons-list-item v-for="lines of deliveryNote.DocumentLines" :key="lines.LineNum">
-        <!-- <v-ons-button v-if="deliveryNote.length === lines.LineNum" @click="addItemRow()">행추가</v-ons-button> -->
-        <v-ons-button  @click="addItemRow()">행추가</v-ons-button> <v-ons-icon icon="md-zoom-in" @click="modalVisible2 = true"></v-ons-icon>
+        <!-- <v-ons-button v-if="deliveryNote.length == lines.LineNum" @click="addItemRow()">행추가</v-ons-button> -->
+        <v-ons-button  @click="addItemRow()">행추가</v-ons-button> 
+        <v-ons-icon icon="md-zoom-in" @click="() => {modalVisible2 = true; lastLineRow = lines.LineNum;}"></v-ons-icon>
         <v-ons-input  placeholder="품목코드" v-model="lines.ItemCode"></v-ons-input>
         <v-ons-input  placeholder="품목명" v-model="lines.ItemName"></v-ons-input>
         <v-ons-input  placeholder="수량" v-model="lines.Quantity"></v-ons-input>
@@ -60,8 +61,12 @@
         @click="setCardCodes(bpitem.CardCode, bpitem.CardName)">
           <v-ons-list-item>
             <div class="left">{{bpitem.CardCode}}</div>
-            <div class="center">{{bpitem.CardName}}</div>
-            <div class="center">{{bpitem.VATRegNum}}</div>
+          </v-ons-list-item>
+          <v-ons-list-item>
+            <div class="left">{{bpitem.CardName}}</div>
+          </v-ons-list-item>
+          <v-ons-list-item>
+            <div class="left">{{bpitem.VATRegNum}}</div>
           </v-ons-list-item>
         </v-ons-list>
       </div>
@@ -69,10 +74,12 @@
 
     <v-ons-modal :visible="modalVisible2" >
       <div v-if="ItemList">
-        <v-ons-list v-for="item of ItemList" :key="item.ItemCode"
+        <v-ons-list v-for="(item, index) of ItemList" :key="index"
         @click="setItemCodes(item.ItemCode, item.ItemName)">
           <v-ons-list-item>
             <div class="left">{{item.ItemCode}}</div>
+          </v-ons-list-item>
+          <v-ons-list-item>
             <div class="center">{{item.ItemName}}</div>
           </v-ons-list-item>
         </v-ons-list>
@@ -100,7 +107,7 @@ export default {
         DocType: "",
         DocumentLines:[
           {
-            LineNum: 1,
+            LineNum: 0,
             ItemCode:"",
             ItemName:"",
             Quantity:0,
@@ -127,7 +134,8 @@ export default {
         {text : '', value: ''},
         {text : '아이템', value: 'dDocument_Items'},
         {text : '서비스', value: 'dDocument_Service'}
-      ]
+      ],
+      lastLineRow : 0
     }
   },
   created: function(){
@@ -197,14 +205,18 @@ export default {
     addItemRow: function(){
       this.deliveryNote.DocumentLines.push(
         {
-            LineNum: this.deliveryNote.DocumentLines.length + 1,
+            LineNum: this.deliveryNote.DocumentLines.length,
             ItemCode:"",
             ItemName:"",
             Quantity:0,
             Price:0
           }
       )
-    }
+    },
+    setItemCodes: function(code, name){
+      this.$set(this.deliveryNote.DocumentLines, this.lastLineRow, {ItemCode: code, ItemName: name, Quantity: 0, LineNum : this.lastLineRow, Price: 0});
+      this.modalVisible2 = false;
+    },
   }
 }
 </script>
